@@ -1,10 +1,11 @@
 import streamlit as st
-import requests
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 import time
+import random
+from datetime import datetime
 
 # ==========================================
 # KONFIGURASI DASHBOARD
@@ -24,33 +25,33 @@ def muat_css(nama_file):
 
 muat_css("style.css")
 
-URL_API = "http://127.0.0.1:8000/api/monitoring-data"
-
 st.title("Dashboard Monitoring Jarak Sensor")
 st.write("Projek IoT Real-time System - Team ZERO")
 st.markdown("---")
 
-
 # ==========================================
-# CLASS LARAVEL API
+# GENERATE DUMMY DATA SENSOR
 # ==========================================
-class LaravelAPI:
-    def __init__(self, url):
-        self.url = url
+# Menyimpan riwayat data di session_state agar grafik tidak reset saat rerun
+if 'riwayat_data' not in st.session_state:
+    st.session_state.riwayat_data = []
 
-    def ambil_data(self):
-        try:
-            response = requests.get(self.url, timeout=1.5)
+# Bikin data baru setiap kali halaman di-rerun
+waktu_sekarang = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+data_baru = {
+    "waktu": waktu_sekarang,
+    "jarak1": round(random.uniform(5.0, 80.0), 1),
+    "jarak2": round(random.uniform(5.0, 80.0), 1),
+    "jarak3": round(random.uniform(5.0, 80.0), 1)
+}
 
-            if response.status_code == 200:
-                return response.json()
+st.session_state.riwayat_data.append(data_baru)
 
-            return None
+# Batasi jumlah data yang ditampilkan agar memori tidak penuh (misal maksimal 30 data terakhir)
+if len(st.session_state.riwayat_data) > 30:
+    st.session_state.riwayat_data.pop(0)
 
-        except Exception as e:
-            print(e)
-            return None
-
+data_json = st.session_state.riwayat_data
 
 # ==========================================
 # CLASS FUZZY LOGIC
@@ -151,14 +152,14 @@ class GrafikFuzzy:
         return fig
 
 
-api = LaravelAPI(URL_API)
-data_json = api.ambil_data()
-
+# ==========================================
+# RENDER TAMPILAN
+# ==========================================
 if data_json and len(data_json) > 0:
 
     df = pd.DataFrame(data_json)
-    df = df.iloc[::-1].reset_index(drop=True)
-
+    
+    # Ambil data terbaru untuk metric cards
     data_terbaru = df.iloc[-1]
 
     j1 = float(data_terbaru['jarak1'])
@@ -234,21 +235,22 @@ if data_json and len(data_json) > 0:
     st.markdown("---")
 
     st.subheader("Tabel Riwayat Data")
+    
+    # Membalikkan dataframe agar data terbaru ada di atas
+    df_reversed = df.iloc[::-1].reset_index(drop=True)
+    st.dataframe(df_reversed, use_container_width=True)
 
-    st.dataframe(df.iloc[::-1], use_container_width=True)
-
-    csv_data = df.to_csv(index=False).encode('utf-8')
+    csv_data = df_reversed.to_csv(index=False).encode('utf-8')
 
     st.download_button(
         label="Unduh Semua Laporan (CSV)",
         data=csv_data,
-        file_name='laporan_sensor_team_zero.csv',
+        file_name='laporan_sensor_team_zero_dummy.csv',
         mime='text/csv'
     )
 
 else:
-    st.warning("Menunggu suplai data dari Backend Laravel...")
-    st.info(f"Mencoba menyambung ke API: {URL_API}")
+    st.warning("Menyiapkan data...")
 
 time.sleep(2)
 st.rerun()
