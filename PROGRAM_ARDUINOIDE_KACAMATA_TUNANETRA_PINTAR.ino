@@ -1,5 +1,17 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <WiFiClientSecure.h>
+#include <UniversalTelegramBot.h>
+
+// ================= DEFINISI TELEGRAM =================
+#define BOTtoken "masukan token bot"
+#define CHAT_ID "masukan chat id"
+
+WiFiClientSecure secured_client;
+UniversalTelegramBot bot(BOTtoken, secured_client);
+
+unsigned long waktuSebelumnyaTelegram = 0;
+const long intervalTelegram = 10000; // Kirim notif Telegram max setiap 10 detik
 
 // ================= DEFINISI PIN SENSOR =================
 #define TRIG_PIN1 4 
@@ -30,9 +42,9 @@ float jarak1 = 999.0;
 float jarak2 = 999.0;
 float jarak3 = 999.0;
 
-const char* ssid = "MASUKAN NAMA HOSPOT INTERNET";            
-const char* password = "MASUKAN PASSWORDNYA";   
-const char* serverName = "MASUKAN LINK ADDRESS IPv4 DARI IP CONFIG"; 
+const char* ssid = "masukan hospot";            
+const char* password = "password";   
+const char* serverName = "ipv4 address"; 
 
 // ================= FUNGSI BACA SENSOR =================
 float ambilJarak(int trigPin, int echoPin) {
@@ -52,7 +64,7 @@ float ambilJarak(int trigPin, int echoPin) {
 }
 
 // ================= FUNGSI KONTROL BUZZER (NON-BLOCKING) =================
-//Membunyikan buzzer tanpa delay yang membekukan program
+// Furina yang buat ini! Membunyikan buzzer tanpa delay yang membekukan program
 void kontrolBuzzer(int pinBuzzer, float jarakEfektif, unsigned long &waktuSebelumnya, bool &statusBuzzer) {
   unsigned long waktuSekarang = millis();
   long durasiNyala = 10; // Buzzer nyala sebentar (bunyi bip pendek)
@@ -91,6 +103,9 @@ void kontrolBuzzer(int pinBuzzer, float jarakEfektif, unsigned long &waktuSebelu
 void setup() {
   Serial.begin(115200);
   
+  // Konfigurasi Telegram Client
+  secured_client.setInsecure(); // Abaikan verifikasi SSL agar proses lebih cepat
+  
   pinMode(TRIG_PIN1, OUTPUT); pinMode(ECHO_PIN1, INPUT);
   pinMode(TRIG_PIN2, OUTPUT); pinMode(ECHO_PIN2, INPUT);
   pinMode(TRIG_PIN3, OUTPUT); pinMode(ECHO_PIN3, INPUT);
@@ -105,6 +120,9 @@ void setup() {
     Serial.print(".");
   }
   Serial.println("\nTerhubung ke WiFi");
+  
+  // Tes kirim pesan saat alat baru menyala
+  bot.sendMessage(CHAT_ID, "✅ Sistem Kacamata Pintar Aktif & Terhubung!", "");
 }
 
 void loop() {
@@ -150,14 +168,29 @@ void loop() {
   }
 
   // -----------------------------------------------------------------
-  // LOGIKA 2: KONTROL BUZZER 
+  // LOGIKA 2: KONTROL BUZZER DENGAN FUNGSI SANG BINTANG
   // -----------------------------------------------------------------
   
-  // Memilih jarak terdekat. Jika Sensor 3 lebih dekat, dia akan mendominasi!
   float jarakEfektifBuzzer1 = min(jarak1, jarak3);
   float jarakEfektifBuzzer2 = min(jarak2, jarak3);
 
-  // Jalankan fungsi pengatur buzzer secara terus menerus (non-blocking)
   kontrolBuzzer(BUZZER_PIN1, jarakEfektifBuzzer1, waktuBuzzer1, statusBuzzer1);
   kontrolBuzzer(BUZZER_PIN2, jarakEfektifBuzzer2, waktuBuzzer2, statusBuzzer2);
+
+  // -----------------------------------------------------------------
+  // LOGIKA 3: NOTIFIKASI TELEGRAM (Jika ada objek < 30 cm)
+  // -----------------------------------------------------------------
+  if (jarak1 <= 30.0 || jarak2 <= 30.0 || jarak3 <= 30.0) {
+    if (waktuSekarang - waktuSebelumnyaTelegram >= intervalTelegram) {
+      waktuSebelumnyaTelegram = waktuSekarang;
+      
+      String pesan = "⚠️ PERINGATAN: Objek sangat dekat!\n";
+      pesan += "Sensor 1: " + String(jarak1 == 999.0 ? 0 : jarak1) + " cm\n";
+      pesan += "Sensor 2: " + String(jarak2 == 999.0 ? 0 : jarak2) + " cm\n";
+      pesan += "Sensor 3: " + String(jarak3 == 999.0 ? 0 : jarak3) + " cm";
+
+      bot.sendMessage(CHAT_ID, pesan, "");
+      Serial.println("Notifikasi Bahaya Terkirim ke Telegram!");
+    }
+  }
 }
