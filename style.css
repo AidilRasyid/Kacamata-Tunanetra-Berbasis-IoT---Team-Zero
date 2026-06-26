@@ -1,0 +1,137 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&display=swap');
+
+html, body, [class*="st-"] {
+    font-family: 'Poppins', sans-serif;
+    color: #E2E8F0;
+}
+
+[data-testid="stAppViewContainer"] {
+    background-color: #0B1120;
+    background-image: radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.1) 0%, transparent 50%);
+    position: relative;
+    z-index: 1;
+}
+
+[data-testid="stAppViewContainer"]::before {
+    content: "ZERO";
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 25vw;
+    font-weight: 900;
+    color: rgba(0, 229, 255, 0.03);
+    z-index: -1;
+    pointer-events: none;
+    letter-spacing: 2vw;
+    text-shadow: 0 0 50px rgba(0, 229, 255, 0.05);
+}
+
+h1 {
+    background: linear-gradient(to right, #00E5FF, #00FF9D);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 25px rgba(0, 229, 255, 0.3);
+    font-weight: 800 !important;
+    letter-spacing: 1px;
+}
+
+h2, h3, h4, h5, h6 {
+    color: #FFFFFF !important;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+[data-testid="stHeader"] {
+    background: rgba(11, 17, 32, 0.8) !important;
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0, 229, 255, 0.15);
+}
+
+[data-testid="stSidebar"] {
+    background-color: rgba(17, 24, 39, 0.85) !important;
+    backdrop-filter: blur(15px);
+    border-right: 1px solid rgba(0, 229, 255, 0.15);
+}
+
+[data-testid="stMetric"] {
+    background: rgba(17, 24, 39, 0.6);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid rgba(0, 229, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+[data-testid="stMetric"]:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 25px rgba(0, 229, 255, 0.25);
+    border-color: #00E5FF;
+}
+
+[data-testid="stMetricLabel"] {
+    color: #94A3B8;
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+[data-testid="stMetricValue"] {
+    color: #00FF9D;
+    font-size: 2.3rem;
+    font-weight: 800;
+    text-shadow: 0 0 15px rgba(0, 255, 157, 0.3);
+}
+
+.stButton > button {
+    background: rgba(17, 24, 39, 0.8);
+    color: #00E5FF;
+    border: 1px solid #00E5FF;
+    border-radius: 12px;
+    padding: 10px 24px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.stButton > button:hover {
+    background: #00E5FF;
+    color: #0B1120;
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
+    transform: translateY(-3px);
+    border-color: #00E5FF;
+}
+
+[data-testid="stVerticalBlockBorderWrapper"] {
+    background: rgba(17, 24, 39, 0.5);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+[data-testid="stVerticalBlockBorderWrapper"]:hover {
+    border-color: #7C3AED;
+    box-shadow: 0 0 25px rgba(124, 58, 237, 0.2);
+}
+
+.stProgress > div > div > div > div {
+    background-image: linear-gradient(to right, #7C3AED, #00E5FF, #00FF9D);
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+    border-radius: 10px;
+}
+
+hr {
+    border-color: rgba(255, 255, 255, 0.1);
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+[data-testid="stDataFrame"] {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(0, 229, 255, 0.15);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
